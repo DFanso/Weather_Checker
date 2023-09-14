@@ -4,11 +4,12 @@ import axios from 'axios';
 import { useLocation } from '../LocationContext';
 import WeatherInfo from '../components/WeatherInfo';
 
-export default function ResultScreen() {
+export default function ResultScreen({navigation}) {
   const { location } = useLocation();
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isFahrenheit, setIsFahrenheit] = useState(true);
+
 
   const toggleTemperatureUnit = () => {
     setIsFahrenheit(!isFahrenheit);
@@ -16,18 +17,27 @@ export default function ResultScreen() {
 
   useEffect(() => {
     const fetchWeather = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get(
-          `http://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${process.env.EXPO_PUBLIC_API_KEY}`
-        );
-        setWeather(response.data);
-        setLoading(false);
-      } catch (error) {
-        console.error('An error occurred:', error);
-        setLoading(false);
-      }
-    };
+        setLoading(true);
+        try {
+          const response = await axios.get(
+            `http://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${process.env.EXPO_PUBLIC_API_KEY}`
+          );
+          if (response.status === 404) {
+            alert('Location weather data not found.');
+            navigation.goBack();  // Navigate back to the home screen
+            return;
+          }
+          setWeather(response.data);
+          setLoading(false);
+        } catch (error) {
+          console.error('An error occurred:', error);
+          if (error.response && error.response.status === 404) {
+            alert('Location weather data not found.');
+            navigation.goBack(); // Navigate back to the home screen
+          }
+          setLoading(false);
+        }
+      };
 
     fetchWeather();
   }, [location]);
