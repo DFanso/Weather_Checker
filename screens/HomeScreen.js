@@ -50,6 +50,10 @@ const HomeScreen = ({ navigation }) => {
   }, []);
 
   const goToResult = () => {
+    if (!location.trim()) {
+      alert('Please enter a location');
+      return;
+    }
     setLocationName(location);
     navigation.navigate('Result');
   };
